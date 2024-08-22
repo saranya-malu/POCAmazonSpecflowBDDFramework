@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using ServiceStack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace POCAmazonSpecflowBDDFramework.Pages
 {
-    public class BaseClass
+    public class HomePage
     {
         private readonly IWebDriver driver;//webdriver instance
         private readonly String pageurl = "https://www.amazon.in/";//homepage url
         //public readonly WebDriverWait wait;
 
 
-        public BaseClass(IWebDriver driver)//parametrized constructor
+        public HomePage(IWebDriver driver)//parametrized constructor
         {
             this.driver = driver;
         }
@@ -24,6 +25,8 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         private IReadOnlyCollection<IWebElement> AutoSuggestList => driver.FindElements(By.XPath("//div[@class='s-suggestion s-suggestion-ellipsis-direction']"));
 
+        private IWebElement addtoCart => driver.FindElement(By.XPath("//button[@id='a-autoid-3-announce']"));
+        
         //navigate to homepage
         public void NavigateToHomePage()//method to navigateto homepage
         {
@@ -42,29 +45,37 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             searchBox.SendKeys(searchItem);
         }
 
-        public void ClickAutoSuggestList(string searchTerm)
+        //Click on auto suggestion list option
+        public ResultsPage ClickAutoSuggestList(string suggestionText)
         {
-            /*  foreach (var item in AutoSuggestList)
+
+              foreach (var item in AutoSuggestList)
               {
                   if (item.Text == suggestionText)
                   {
 
-                      //WebDriverWait wait =new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-                      //Thread.Sleep(10000);
+                      WebDriverWait wait =new WebDriverWait(driver, TimeSpan.FromSeconds(15));
                       item.Click();
-                      Thread.Sleep(10000);
-                      break;
+                      return new ResultsPage(driver);//redirected to search results page
                   }
-              }*/
-            var suggestion = AutoSuggestList.FirstOrDefault(s => s.Text.Contains(searchTerm));
+              }
+            return null;
+           /* var suggestion = AutoSuggestList.FirstOrDefault(s => s.Text.Contains(searchTerm));
             if (suggestion != null)
             {
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                 suggestion.Click();
+                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             }
             else
             {
                 throw new NoSuchElementException($"No autosuggestion found for {searchTerm}");
-            }
+            }*/
+        }
+
+        public void ClickAddtoCart()
+        {
+
         }
     }
 }

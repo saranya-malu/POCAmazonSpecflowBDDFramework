@@ -6,6 +6,7 @@ Navigate to home page
 Scenario: Launch the browser and navigate to home page
 	Given I navigate to home page
 	Then I should see the page Title
+	Then I click on 
 	When I search for 'laptop i7'
 
 @login1
@@ -13,4 +14,6 @@ Scenario: Amazon usecases
 	Given I navigate to home page
 	When I search for 'laptop i7'
 	Then I click on 'laptop i7' option
+	When I select brand name 'lenovo'
+	Then I click on Add to cart button
 

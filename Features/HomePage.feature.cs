@@ -153,6 +153,9 @@ this.ScenarioInitialize(scenarioInfo);
 #line 15
  testRunner.Then("I click on \'laptop i7\' option", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
+#line 16
+ testRunner.When("I select brand name \'lenovo\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
             }
             this.ScenarioCleanup();
         }

@@ -13,8 +13,9 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
     [Binding]
     public class HomePageStepDefinitions
     {
-        private readonly BaseClass homepage;
+        private readonly HomePage homepage;
         private readonly IWebDriver driver;
+        private ResultsPage resultPage;
 
         //private ScenarioContext scenarioContext;
         public HomePageStepDefinitions(ScenarioContext scenarioContext)
@@ -25,7 +26,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
                 throw new NullReferenceException("WebDriver is not initialized.");
             }
 
-            homepage = new BaseClass(driver);
+            homepage = new HomePage(driver);
         }
 
         [Given(@"I navigate to home page")]
@@ -50,11 +51,21 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         }
 
         [Then(@"I click on '([^']*)' option")]
-        public void ThenIClickOnOption(string suggestionText)
+        public void ThenIClickOnOption(string searchItem)
         {
-            homepage.ClickAutoSuggestList(suggestionText);
+            resultPage=homepage.ClickAutoSuggestList(searchItem);
         }
 
+        [When(@"I select brand name '([^']*)'")]
+        public void WhenISelectBrandName(string lenovo)
+        {
+            resultPage.ClickLenovo();
+        }
 
+        [Then(@"I click on Add to cart button")]
+        public void ThenIClickOnAddToCartButton()
+        {
+            throw new PendingStepException();
+        }
     }
 }
