@@ -23,9 +23,8 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         private IWebElement searchBox => driver.FindElement(By.XPath("//input[@id='twotabsearchtextbox']"));
 
-        private IReadOnlyCollection<IWebElement> AutoSuggestList => driver.FindElements(By.XPath("//div[@class='s-suggestion s-suggestion-ellipsis-direction']"));
-
-        private IWebElement addtoCart => driver.FindElement(By.XPath("//button[@id='a-autoid-3-announce']"));
+        //private IReadOnlyCollection<IWebElement> AutoSuggestList => driver.FindElements(By.XPath("//div[@class='s-suggestion s-suggestion-ellipsis-direction']"));
+        private IReadOnlyCollection<IWebElement> AutoSuggestList => driver.FindElements(By.XPath("//div[contains(@class,'results-container')]//div[contains(@class,'suggestion-container')]//div[@role='button']"));
         
         //navigate to homepage
         public void NavigateToHomePage()//method to navigateto homepage
@@ -49,7 +48,11 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         public ResultsPage ClickAutoSuggestList(string suggestionText)
         {
 
-              foreach (var item in AutoSuggestList)
+            Thread.Sleep(5000);
+
+            //    WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+            foreach (var item in AutoSuggestList)
               {
                   if (item.Text == suggestionText)
                   {
@@ -71,11 +74,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             {
                 throw new NoSuchElementException($"No autosuggestion found for {searchTerm}");
             }*/
-        }
-
-        public void ClickAddtoCart()
-        {
-
         }
     }
 }

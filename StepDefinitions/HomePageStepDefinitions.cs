@@ -54,6 +54,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         public void ThenIClickOnOption(string searchItem)
         {
             resultPage=homepage.ClickAutoSuggestList(searchItem);
+            //homepage.ClickAutoSuggestList(searchItem);
         }
 
         [When(@"I select brand name '([^']*)'")]
@@ -65,7 +66,42 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         [Then(@"I click on Add to cart button")]
         public void ThenIClickOnAddToCartButton()
         {
-            throw new PendingStepException();
+            resultPage.ClickAddtoCart();
         }
+
+        [Then(@"I click on cart button")]
+        public void ThenIClickOnCartButton()
+        {
+            resultPage.ClickMoveToCart();
+        }
+
+        [Then(@"I click on Payment method button")]
+        public void ThenIClickOnPaymentMethodButton()
+        {
+            resultPage.ClickOnPay();
+        }
+
+        [When(@"I enter username and password")]
+        public void WhenIEnterUsernameAndPassword()
+        {
+            resultPage.EnterUserName("7034652730");
+            resultPage.ClickContinue();
+            resultPage.EnterPassword("Auto@2255");
+            resultPage.SignIn();
+
+        }
+
+        [Then(@"I choose delivery address")]
+        public void ThenIChooseDeliveryAddress()
+        {
+            resultPage.ClickOnUseThisAddress();
+        }
+
+        [Then(@"I select a payment method")]
+        public void ThenISelectAPaymentMethod()
+        {
+            resultPage.ClickOnPaymentMethod();
+        }
+
     }
 }
