@@ -1,10 +1,12 @@
-﻿using OpenQA.Selenium;
+﻿using Allure.Net.Commons;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace POCAmazonSpecflowBDDFramework.Hooks
 {
@@ -13,7 +15,6 @@ namespace POCAmazonSpecflowBDDFramework.Hooks
     {
         private readonly ScenarioContext scenarioContext;
         private static IWebDriver driver;//webdriver reference variable
-
         public Hooks(ScenarioContext scenarioContext)
         {
             this.scenarioContext = scenarioContext;
@@ -30,15 +31,14 @@ namespace POCAmazonSpecflowBDDFramework.Hooks
             }
 
             scenarioContext["WebDriver"]= driver;
-            driver.Manage().Window.Maximize();
-            
+            driver.Manage().Window.Maximize();           
         }
 
- /*       [AfterScenario]
-        public static void CloseBrowser()
-        {
-            driver.Quit();
-        }*/
+        /*       [AfterScenario]
+               public static void CloseBrowser()
+               {
+                   driver.Quit();
+               }*/
 
         //property to get webdriver instance in step definitions
         public static IWebDriver Driver

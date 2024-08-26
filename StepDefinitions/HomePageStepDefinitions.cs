@@ -16,6 +16,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         private readonly HomePage homepage;
         private readonly IWebDriver driver;
         private ResultsPage resultPage;
+        private List<Laptop> allLaptops;
 
         //private ScenarioContext scenarioContext;
         public HomePageStepDefinitions(ScenarioContext scenarioContext)
@@ -100,8 +101,43 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         [Then(@"I select a payment method")]
         public void ThenISelectAPaymentMethod()
         {
+            resultPage.ScrollDown();
             resultPage.ClickOnPaymentMethod();
         }
 
+        [When(@"I select price range")]
+        public void WhenISelectPriceRange()
+        {
+            resultPage.PriceRange(100,200);
+           // int leftOffset = CalculateLeftSliderOffset(minprice);
+        }
+
+        [Then(@"I click on next button till (.*)th page")]
+        public void ThenIClickOnNextButtonTillThPage(int pageno)
+        {
+            int currentPage = 1;
+            allLaptops.AddRange(resultPage.GetLaptops());
+            while (currentPage <= pageno)
+            {
+                resultPage.GoToNextPage();
+                currentPage++;
+                break;
+            }
+        }
+
+        [Then(@"I identify (.*) laptops based on reviews and offers")]
+        public void ThenIIdentifyLaptopsBasedOnReviewsAndOffers(int number)
+        {
+            Thread.Sleep(5000);
+            var topLaptops = allLaptops.OrderByDescending(I => I.Reviews) //sorting by reviews in descending order
+                .ThenByDescending(I => I.Offers) //sorting by offers in descending order if reviews are the same
+                .Take(number) //Taking the top number of laptops
+                .ToList();
+
+            foreach (var laptop in topLaptops)
+            {
+                Console.WriteLine("Laptop: { laptop.Title}, Reviews: { laptop.Reviews}, Offers: { laptop.Offers}");
+            }
+        }
     }
 }

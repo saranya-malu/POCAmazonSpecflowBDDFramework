@@ -14,12 +14,14 @@ Scenario: Amazon usecases
 	When I search for 'laptop i7'
 	Then I click on 'laptop i7' option
 	When I select brand name 'lenovo'
-	Then I click on Add to cart button
-	Then I click on cart button
-	Then I click on Payment method button
-	When I enter username and password
-	Then I choose delivery address
-	Then I select a payment method
+	And I select price range
+	#Then I click on next button till 5th page
+	#Then I identify 3 laptops based on reviews and offers
+	#Then I click on Add to cart button
+	#Then I click on Payment method button
+	#When I enter username and password
+	#Then I choose delivery address
+	#Then I select a payment method
 	
 
 
