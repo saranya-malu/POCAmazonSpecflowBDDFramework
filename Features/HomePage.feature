@@ -21,12 +21,13 @@ Scenario: Amazon usecases
 	| 20000      | 30000      |
 	#Then I click on next button till 5th page
 	#Then I navigate till last page of search results
-	Then I should store Top Three laptop Details into Excel
-	#Then I click on Add to cart button
-	#Then I click on Payment method button
-	#When I enter username and password
-	#Then I choose delivery address
-	#Then I select a payment method
+	#Then I should store Top Three laptop Details into Excel
+	Then I click on Add to cart button
+	Then I click on cart button
+	Then I click on Payment method button
+	When I enter username and password
+	Then I choose delivery address
+	Then I select a payment method
 	
 
 
