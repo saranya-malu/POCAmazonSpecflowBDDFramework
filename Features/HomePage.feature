@@ -13,10 +13,15 @@ Scenario: Amazon usecases
 	Given I navigate to home page
 	When I search for 'laptop i7'
 	Then I click on 'laptop i7' option
-	When I select brand name 'lenovo'
-	And I select price range
+	When I select brand name
+	| Brand  |
+	| Lenovo |
+	Then I select price range in filter
+	| LowerLimit | UpperLimit |
+	| 20000      | 30000      |
 	#Then I click on next button till 5th page
-	#Then I identify 3 laptops based on reviews and offers
+	#Then I navigate till last page of search results
+	Then I should store Top Three laptop Details into Excel
 	#Then I click on Add to cart button
 	#Then I click on Payment method button
 	#When I enter username and password

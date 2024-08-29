@@ -1,9 +1,13 @@
-﻿using OpenQA.Selenium;
+﻿using ClosedXML.Excel;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using POCAmazonSpecflowBDDFramework.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace POCAmazonSpecflowBDDFramework.Pages
@@ -15,9 +19,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         private Actions actions;
 
         private IWebElement lenovo => driver.FindElement(By.XPath("//span[text()='Lenovo']"));
-        private IWebElement minPrice => driver.FindElement(By.XPath("//input[@id='p_36/range-slider_slider-item_lower-bound-slider']"));
-        private IWebElement maxPrice => driver.FindElement(By.XPath("//input[@id='p_36/range-slider_slider-item_upper-bound-slider']"));
-
+        
         private IWebElement goButton => driver.FindElement(By.XPath("//input[@class='a-button-input' and @type='submit']"));
         private IWebElement addtoCart => driver.FindElement(By.XPath("//button[@id='a-autoid-1-announce']"));
 
@@ -36,9 +38,38 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         private IWebElement paymentOption => driver.FindElement(By.XPath("//input[@value='SelectableAddCreditCard']"));
 
-        private IWebElement nextButton => driver.FindElement(By.XPath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']"));
+        private IWebElement priceRangeUpperBound => driver.FindElement(By.XPath("//input[contains(@id,'slider-item_upper-bound-slider')]"));
 
+        private IWebElement priceRangeLowerBound => driver.FindElement(By.XPath("//input[contains(@id,'slider-item_lower-bound-slider')]"));
+
+        IReadOnlyCollection<IWebElement> filterBrandNameList => driver.FindElements(By.XPath("//div[@id='brandsRefinements']//ul[contains(@id,'filter')]//span[@class='a-list-item']/a//span[@class='a-size-base a-color-base']"));
+
+        private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
+
+        private IWebElement NextButton => driver.FindElement(By.XPath(_nextButton));
         private By laptopLocators => By.XPath("//span[@class='rush-component s-latency-cf-section']");
+
+        private readonly string _resultRow = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']";
+
+
+        private readonly string _productTitle = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']//div[@data-cy='title-recipe']//span";
+
+
+        private readonly string _ratingElement = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']//div[@data-cy='title-recipe']//span[contains(text(),'{0}')]/parent::a/parent::h2/parent::div/following-sibling::div[@data-cy='reviews-block']//span[contains(@aria-label,'stars')]";
+
+
+        private readonly string _ItemOffer = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']//div[@data-cy='title-recipe']//span[contains(text(),'{0}')]/parent::a/parent::h2/parent::div/following-sibling::div[@class='puisg-row']//div[@data-cy='price-recipe']//span[contains(text(),'%')]";
+
+        private readonly string _paginationStrip = "//span[@class='s-pagination-strip']";
+
+        private IWebElement PaginationStrip => driver.FindElement(By.XPath(_paginationStrip));
+
+        private readonly string _paginationButtons = "//span[@class='s-pagination-strip']//a[@class='s-pagination-item s-pagination-button']";
+
+        private readonly string _currentPage = "//span[@class='s-pagination-strip']//span[contains(@aria-label,'Current page')]";
+
+        private IWebElement CurrentPage => driver.FindElement(By.XPath(_currentPage));
+        IReadOnlyCollection<IWebElement> PaginationButtons => driver.FindElements(By.XPath(_paginationButtons));
         public ResultsPage(IWebDriver driver)
         {
             this.driver = driver;
@@ -120,56 +151,279 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             _jsExecutor.ExecuteScript("window.scrollBy(0,{scroll});");
         }
 
-        public void PriceRange(int leftOffset,int rightOffset)
+        public void SelectBrandNameAsFilter(String BrandName)
         {
-            //    _jsExecutor.ExecuteScript("document.getElementById('p_36/range-slider_slider-item_lower-bound-slider').value='50000'");
-            //    _jsExecutor.ExecuteScript("document.getElementById('p_36/range-slider_slider-item_upper-bound-slider').value='100000'");
-            //    _jsExecutor.ExecuteScript("document.querySelector('input.a-button-input').click();");
-            actions.ClickAndHold(minPrice).MoveByOffset(leftOffset,0).Release().Perform();
-            actions.ClickAndHold(maxPrice).MoveByOffset(rightOffset,0).Release().Perform();
-            
-        }
-
-        public List<Laptop> GetLaptops()
-        {
-            var laptopElements = driver.FindElements(laptopLocators);
-            List<Laptop> laptops = new List<Laptop>();
-
-            foreach (var laptopElement in laptopElements)
+            foreach(IWebElement element in filterBrandNameList)
             {
-                try
+                String Brand=element.Text;
+                if (Brand.Equals(BrandName))
                 {
-                    string title = laptopElement.FindElement(By.CssSelector("span.a-size-medium a-color-base a-text-normal")).Text;
-                    //int reviews = int.Parse(laptopElement.FindElement(By.CssSelector("a.a-popover-trigger a-declarative")).Text.Split(' ')[0].Replace(",", ""));
-                    int reviews = int.Parse(laptopElement.FindElement(By.CssSelector("a.a-popover-trigger a-declarative")).Text);
-                    //int offers = int.Parse(laptopElement.FindElement(By.CssSelector("span.a-color-secondary span.a-size-base")).Text.Replace(" offers", ""));
-                    int offers = int.Parse(laptopElement.FindElement(By.PartialLinkText("off")).Text);
-
-                    laptops.Add(new Laptop { Title = title, Reviews = reviews, Offers = offers });
+                    element.Click();
+                    break;
                 }
-                catch
-                {
-                    Console.WriteLine("Failed");
-                }
-
             }
-
-            return laptops;
         }
 
         // Method to go to the next page
-        public void GoToNextPage()
+        //public void GoToNextPage()
+        //{
+        //    if (CheckNextButtonDisable() != true)
+        //    {
+        //        driver.FindElement(nextButton).Click();
+        //    }
+            
+        //}
+
+        ////Method to check nextbutton disabled
+        //public bool CheckNextButtonDisable()
+        //{
+        //    string val= driver.FindElement(nextButton).GetAttribute("aria-disabled");
+        //    return val != "true";
+        //}
+
+        //Extract numeric value
+        public int ExtractNumericValue(string priceText)
         {
-            nextButton.Click();
+            string numericText = new string(priceText.Where(c => char.IsDigit(c)).ToArray());//convert enumerable characters to string
+            return int.Parse(numericText); //convert thestring to integer
+        }
+
+        // Extract the minimum and maximum prices directly from the slider attributes
+        public int CalculateSliderValue(int price,int maxSliderValue)
+        {
+            int minPrice = ExtractNumericValue(priceRangeUpperBound.GetAttribute("aria-valuetext"));//calling Extract method to get value from upper range after conversion
+            int maxPrice = ExtractNumericValue(priceRangeLowerBound.GetAttribute("aria-valuetext"));//calling Extract method to get value from lower range after conversion
+
+            // Clamp the input price within the slider’s range
+            if (price < minPrice) price= minPrice;
+            if(price > maxPrice) price= maxPrice;
+
+            // Calculate the slider value proportionally
+            double proportion=(double)(price-minPrice)/(maxPrice-minPrice);
+            return (int)(Math.Round(proportion*maxSliderValue));
+        }
+
+        //Move slider
+        private void SetSliderValueWithJavaScript(IWebElement slider, int value)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input')); arguments[0].dispatchEvent(new Event('change'));", slider, value);
+        }
+
+        //Setprice range to sliders
+        public void SetPriceRangeFilter(int lowerPrice,int upperPrice)
+        {
+            // Calculate slider values based on the desired price range
+            int maxSliderValue = int.Parse(priceRangeUpperBound.GetAttribute("max"));
+            int lowerValue = CalculateSliderValue(lowerPrice, maxSliderValue);
+            int upperValue = CalculateSliderValue(upperPrice, maxSliderValue);
+
+            // Ensure lowerValue is not greater than upperValue
+            if (lowerValue > upperValue)
+            {
+                lowerValue = upperValue - 1;  // Adjust to avoid overlap or invalid state
+            }
+
+            // Set the value attribute directly for the lower and upper bounds
+            SetSliderValueWithJavaScript(priceRangeLowerBound, lowerValue);
+            Thread.Sleep(1000);  // Small delay to ensure the UI updates
+            SetSliderValueWithJavaScript(priceRangeUpperBound, upperValue);
+
+            // Click the Go button to apply the filter
+
+            goButton.Click();
+        }
+
+        public void scrollToViewPaginationStrip()
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript("arguments[0].scrollIntoView();", PaginationStrip);
+        }
+
+        public void loadNextPage()
+        {
+            scrollToViewPaginationStrip();
+            int currentPage = int.Parse(CurrentPage.Text.ToString());
+            if (PaginationButtons.Count > 0)
+            {
+                foreach (IWebElement currentPageNo in PaginationButtons)
+                {
+                    int g = 0;
+                }
+            }
+        }
+
+        public Boolean IsNextButtonDisabled()
+        {
+            return NextButton.GetAttribute("class").Contains("pagination-disabled");
+        }
+
+
+        public JsonArray GetLaptopDetails()
+        {
+            List<IWebElement> products = GetProductsTitle();
+            var laptopDetailsList = new List<LaptopDetails>();
+
+            for (int i = 0; i < 4; i++)
+            {
+                string laptopName = products[i].Text;
+                int keywordIndex = laptopName.IndexOf("Laptop");
+                if (keywordIndex != -1)
+                {
+                    laptopName = laptopName.Substring(0, keywordIndex + "Laptop".Length).Trim();
+                }
+
+                double rating = 0.0;
+                int offer = 0;
+                List<IWebElement> productRatingElements = GetProductsRating(laptopName);
+                List<IWebElement> productOfferElements = GetProductsOffer(laptopName);
+
+                if (productRatingElements.Count > 0 && productOfferElements.Count > 0)
+                {
+                    string ratingText = productRatingElements[0].GetAttribute("aria-label");
+                    var Ratingmatch = Regex.Match(ratingText, @"(\d+(\.\d+)?)");
+                    if (Ratingmatch.Success)
+                    {
+                        double parsedRating;
+                        if (double.TryParse(Ratingmatch.Value, out parsedRating))
+                        {
+                            rating = parsedRating;
+                        }
+                    }
+
+                    string offerText = productOfferElements[0].Text;
+                    var Offermatch = Regex.Match(offerText, @"(\d+)% off");
+                    if (Offermatch.Success)
+                    {
+                        offer = int.Parse(Offermatch.Groups[1].Value);
+                    }
+                }
+
+                laptopDetailsList.Add(new LaptopDetails
+                {
+                    LaptopName = laptopName,
+                    Rating = rating,
+                    Offer = offer
+                });
+            }
+
+
+            var jsonArray = new JsonArray();
+            foreach (var detail in laptopDetailsList)
+            {
+                var jsonObject = new JsonObject
+                {
+                    ["LaptopName"] = detail.LaptopName,
+                    ["Rating"] = detail.Rating,
+                    ["Offer"] = detail.Offer
+                };
+                jsonArray.Add(jsonObject);
+            }
+
+            return jsonArray;
+        }
+
+        public List<IWebElement> GetProductsTitle()
+        {
+            return driver.FindElements(By.XPath(_productTitle)).ToList();
+        }
+
+        public List<IWebElement> GetProductsRating(String laptopName)
+        {
+            return driver.FindElements(By.XPath(String.Format(_ratingElement, laptopName))).ToList();
+        }
+
+        public List<IWebElement> GetProductsOffer(String laptopName)
+        {
+            return driver.FindElements(By.XPath(String.Format(_ItemOffer, laptopName))).ToList();
+        }
+
+        public void WriteJsonArrayToExcel(JsonArray jsonArray)
+        {
+
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+
+            Console.WriteLine($"Base Directory: {baseDirectory}");
+
+
+            string projectRootDirectory = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\..\..\..\..\"));
+
+
+            Console.WriteLine($"Project Root Directory: {projectRootDirectory}");
+
+
+            string folderPath = Path.Combine(projectRootDirectory, "LapTopData");
+            string filePath = Path.Combine(folderPath, "LapTopDetails.xlsx");
+
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("page1");
+
+
+                worksheet.Cell(1, 1).Value = "LaptopName";
+                worksheet.Cell(1, 2).Value = "Rating";
+                worksheet.Cell(1, 3).Value = "Offer";
+
+
+                int row = 2; // Start from the second row
+                foreach (var item in jsonArray)
+                {
+                    var jsonObject = item.AsObject();
+                    worksheet.Cell(row, 1).Value = jsonObject["LaptopName"]?.ToString();
+                    worksheet.Cell(row, 2).Value = jsonObject["Rating"]?.ToString();
+                    worksheet.Cell(row, 3).Value = jsonObject["Offer"]?.ToString();
+                    row++;
+                }
+
+
+                workbook.SaveAs(filePath);
+            }
+
+            Console.WriteLine($"Excel file created at: {filePath}");
+        }
+
+        public JsonArray GetTop3Laptops(JsonArray jsonArray)
+        {
+
+            var laptopDetailsList = jsonArray.Select(item =>
+            {
+                var jsonObject = item.AsObject();
+                return new LaptopDetails
+                {
+                    LaptopName = jsonObject["LaptopName"]?.ToString(),
+                    Rating = jsonObject["Rating"]?.GetValue<double>() ?? 0.0,
+                    Offer = jsonObject["Offer"]?.GetValue<int>() ?? 0
+                };
+            }).ToList();
+
+
+            var sortedList = laptopDetailsList
+                .OrderByDescending(l => l.Rating)
+                .ThenByDescending(l => l.Offer)
+                .Take(3)
+                .ToList();
+
+
+            var sortedJsonArray = new JsonArray();
+            foreach (var detail in sortedList)
+            {
+                var jsonObject = new JsonObject
+                {
+                    ["LaptopName"] = detail.LaptopName,
+                    ["Rating"] = detail.Rating,
+                    ["Offer"] = detail.Offer
+                };
+                sortedJsonArray.Add(jsonObject);
+            }
+
+            return sortedJsonArray;
         }
     }
-
-        // Laptop class to hold details
-        public class Laptop
-        {
-            public string Title { get; set; }
-            public int Reviews { get; set; }
-            public int Offers { get; set; }
-        }
 
 }

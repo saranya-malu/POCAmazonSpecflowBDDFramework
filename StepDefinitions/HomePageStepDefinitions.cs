@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using POCAmazonSpecflowBDDFramework.Pages;
 using OpenQA.Selenium.Chrome;
 using NUnit.Framework;
+using POCAmazonSpecflowBDDFramework.Helpers;
+using System.Data;
+using TechTalk.SpecFlow.Assist;
+using System.Text.Json.Nodes;
 
 namespace POCAmazonSpecflowBDDFramework.StepDefinitions
 {
@@ -16,7 +20,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         private readonly HomePage homepage;
         private readonly IWebDriver driver;
         private ResultsPage resultPage;
-        private List<Laptop> allLaptops;
+       // private List<Laptop> allLaptops;
 
         //private ScenarioContext scenarioContext;
         public HomePageStepDefinitions(ScenarioContext scenarioContext)
@@ -64,6 +68,13 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
             resultPage.ClickLenovo();
         }
 
+        [When(@"I select brand name")]
+        public void WhenISelectBrandName(Table table)
+        {
+            dynamic data = table.CreateDynamicInstance();
+            resultPage.SelectBrandNameAsFilter(data.Brand);
+        }
+
         [Then(@"I click on Add to cart button")]
         public void ThenIClickOnAddToCartButton()
         {
@@ -105,39 +116,69 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
             resultPage.ClickOnPaymentMethod();
         }
 
-        [When(@"I select price range")]
-        public void WhenISelectPriceRange()
+        [Then(@"I select price range in filter")]
+        public void WhenISelectPriceRangeInFilter(Table table)
         {
-            resultPage.PriceRange(100,200);
-           // int leftOffset = CalculateLeftSliderOffset(minprice);
-        }
-
-        [Then(@"I click on next button till (.*)th page")]
-        public void ThenIClickOnNextButtonTillThPage(int pageno)
-        {
-            int currentPage = 1;
-            allLaptops.AddRange(resultPage.GetLaptops());
-            while (currentPage <= pageno)
+            var dataTable=SpecflowTableHelper.ToDataTable(table);
+            foreach (DataRow row in dataTable.Rows)
             {
-                resultPage.GoToNextPage();
-                currentPage++;
-                break;
+                resultPage.SetPriceRangeFilter(int.Parse(row.ItemArray[0].ToString()), int.Parse(row.ItemArray[1].ToString()));
             }
         }
 
-        [Then(@"I identify (.*) laptops based on reviews and offers")]
-        public void ThenIIdentifyLaptopsBasedOnReviewsAndOffers(int number)
-        {
-            Thread.Sleep(5000);
-            var topLaptops = allLaptops.OrderByDescending(I => I.Reviews) //sorting by reviews in descending order
-                .ThenByDescending(I => I.Offers) //sorting by offers in descending order if reviews are the same
-                .Take(number) //Taking the top number of laptops
-                .ToList();
 
-            foreach (var laptop in topLaptops)
-            {
-                Console.WriteLine("Laptop: { laptop.Title}, Reviews: { laptop.Reviews}, Offers: { laptop.Offers}");
-            }
+        //[Then(@"I click on next button till (.*)th page")]
+        //public void ThenIClickOnNextButtonTillThPage(int pageno)
+        //{
+        //    int currentPage = 1;
+        //    allLaptops.AddRange(resultPage.GetLaptops());
+        //    while (currentPage <= pageno)
+        //    {
+        //        resultPage.GoToNextPage();
+        //        currentPage++;
+        //        break;
+        //    }
+        //}
+
+        //[Then(@"I navigate till last page of search results")]
+        //public void ThenINavigateTillLastPageOfSearchResults()
+        //{
+        //    int curretPage = 1;
+        //    allLaptops.AddRange(resultPage.GetLaptops());
+        //    if (curretPage <= 5 || resultPage.CheckNextButtonDisable() != false)
+        //    {
+        //        while (curretPage <= 5)
+        //        {
+        //            resultPage.GoToNextPage();
+        //            curretPage++;
+
+        //        }
+
+        //    }
+        //}
+
+        /* [Then(@"I identify (.*) laptops based on reviews and offers")]
+         public void ThenIIdentifyLaptopsBasedOnReviewsAndOffers(int number)
+         {
+             Thread.Sleep(5000);
+             var topLaptops = allLaptops.OrderByDescending(I => I.Reviews) //sorting by reviews in descending order
+                 .ThenByDescending(I => I.Offers) //sorting by offers in descending order if reviews are the same
+                 .Take(number) //Taking the top number of laptops
+                 .ToList();
+
+             foreach (var laptop in topLaptops)
+             {
+                 Console.WriteLine("Laptop: { laptop.Title}, Reviews: { laptop.Reviews}, Offers: { laptop.Offers}");
+             }
+         }*/
+
+        [Then(@"I should store Top Three laptop Details into Excel")]
+        public void ThenIShouldStoreTopThreeLaptopDetailsIntoExcel()
+        {
+            JsonArray LaptopDetails = resultPage.GetLaptopDetails();
+            JsonArray Top3Laptops = resultPage.GetTop3Laptops(LaptopDetails);
+            Console.WriteLine(LaptopDetails.ToString());
+            resultPage.WriteJsonArrayToExcel(Top3Laptops);
         }
     }
 }

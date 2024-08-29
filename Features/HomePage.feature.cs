@@ -153,11 +153,24 @@ this.ScenarioInitialize(scenarioInfo);
 #line 15
  testRunner.Then("I click on \'laptop i7\' option", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
+                TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Brand"});
+                table1.AddRow(new string[] {
+                            "Lenovo"});
 #line 16
- testRunner.When("I select brand name \'lenovo\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+ testRunner.When("I select brand name", ((string)(null)), table1, "When ");
 #line hidden
-#line 17
- testRunner.And("I select price range", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+                TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
+                            "LowerLimit",
+                            "UpperLimit"});
+                table2.AddRow(new string[] {
+                            "20000",
+                            "30000"});
+#line 19
+ testRunner.Then("I select price range in filter", ((string)(null)), table2, "Then ");
+#line hidden
+#line 24
+ testRunner.Then("I should store Top Three laptop Details into Excel", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
