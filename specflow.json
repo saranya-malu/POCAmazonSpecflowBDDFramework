@@ -9,7 +9,10 @@
     {
       "name": "SpecFlow.Tools.MsBuild.Generation",
       "type": "Generator"
+    },
+    {
+      "name": "Allure"
     }
   ],
-  "stepAssemblies": []
+  "stepAssemblies": [ { "assembly": "Allure.SpecFlowPlugin" } ]
 }

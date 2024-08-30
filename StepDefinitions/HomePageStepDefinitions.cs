@@ -20,7 +20,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         private readonly HomePage homepage;
         private readonly IWebDriver driver;
         private ResultsPage resultPage;
-       // private List<Laptop> allLaptops;
+
 
         //private ScenarioContext scenarioContext;
         public HomePageStepDefinitions(ScenarioContext scenarioContext)
@@ -126,36 +126,11 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
             }
         }
 
-
-        //[Then(@"I click on next button till (.*)th page")]
-        //public void ThenIClickOnNextButtonTillThPage(int pageno)
-        //{
-        //    int currentPage = 1;
-        //    allLaptops.AddRange(resultPage.GetLaptops());
-        //    while (currentPage <= pageno)
-        //    {
-        //        resultPage.GoToNextPage();
-        //        currentPage++;
-        //        break;
-        //    }
-        //}
-
-        //[Then(@"I navigate till last page of search results")]
-        //public void ThenINavigateTillLastPageOfSearchResults()
-        //{
-        //    int curretPage = 1;
-        //    allLaptops.AddRange(resultPage.GetLaptops());
-        //    if (curretPage <= 5 || resultPage.CheckNextButtonDisable() != false)
-        //    {
-        //        while (curretPage <= 5)
-        //        {
-        //            resultPage.GoToNextPage();
-        //            curretPage++;
-
-        //        }
-
-        //    }
-        //}
+        [Then(@"I navigate till last page of search results")]
+        public void ThenINavigateTillLastPageOfSearchResults()
+        {
+            throw new PendingStepException();
+        }
 
         /* [Then(@"I identify (.*) laptops based on reviews and offers")]
          public void ThenIIdentifyLaptopsBasedOnReviewsAndOffers(int number)

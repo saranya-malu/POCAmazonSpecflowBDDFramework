@@ -11,17 +11,24 @@
     <Content Remove="C:\Users\Saranya\.nuget\packages\allure.specflow\2.12.1\contentFiles\any\netstandard2.0\allureConfig.Template.json" />
   </ItemGroup>
 
+	<ItemGroup>
+		<None Update="specflow.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
   <ItemGroup>
+    <PackageReference Include="Allure.SpecFlow" Version="2.12.1" />
     <PackageReference Include="ClosedXML.DP" Version="0.95.3.31" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.23.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.24.0" />
     <PackageReference Include="ServiceStack.Common" Version="8.3.0" />
     <PackageReference Include="SpecFlow.Assist.Dynamic" Version="1.4.2" />
     <PackageReference Include="SpecFlow.Plus.LivingDocPlugin" Version="3.9.57" />
-    <PackageReference Include="SpecFlow.NUnit" Version="3.9.40" />
+    <PackageReference Include="SpecFlow.NUnit" Version="3.9.74" />
     <PackageReference Include="nunit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
-    <PackageReference Include="FluentAssertions" Version="6.2.0" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
   </ItemGroup>
 
   <ItemGroup>

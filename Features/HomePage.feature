@@ -8,7 +8,7 @@ Scenario: Launch the browser and navigate to home page
 	Then I should see the page Title
 	When I search for 'laptop i7'
 
-@login1
+@SearchItem
 Scenario: Amazon usecases
 	Given I navigate to home page
 	When I search for 'laptop i7'
@@ -19,8 +19,7 @@ Scenario: Amazon usecases
 	Then I select price range in filter
 	| LowerLimit | UpperLimit |
 	| 20000      | 30000      |
-	#Then I click on next button till 5th page
-	#Then I navigate till last page of search results
+	Then I navigate till last page of search results
 	#Then I should store Top Three laptop Details into Excel
 	Then I click on Add to cart button
 	Then I click on cart button
@@ -28,6 +27,7 @@ Scenario: Amazon usecases
 	When I enter username and password
 	Then I choose delivery address
 	Then I select a payment method
+
 	
 
 
