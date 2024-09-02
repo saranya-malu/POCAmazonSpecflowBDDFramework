@@ -129,7 +129,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         [Then(@"I navigate till last page of search results")]
         public void ThenINavigateTillLastPageOfSearchResults()
         {
-            throw new PendingStepException();
+          resultPage.IsNextButtonDisabled();
         }
 
         /* [Then(@"I identify (.*) laptops based on reviews and offers")]

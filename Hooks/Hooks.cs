@@ -44,6 +44,7 @@ namespace POCAmazonSpecflowBDDFramework.Hooks
 
             scenarioContext["WebDriver"]= driver;
             driver.Manage().Window.Maximize(); 
+            driver.Manage().Cookies.DeleteAllCookies();
         }
 
 /*             [AfterScenario]

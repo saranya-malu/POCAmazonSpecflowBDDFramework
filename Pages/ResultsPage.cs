@@ -4,6 +4,7 @@ using OpenQA.Selenium.Interactions;
 using POCAmazonSpecflowBDDFramework.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -44,9 +45,8 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         IReadOnlyCollection<IWebElement> filterBrandNameList => driver.FindElements(By.XPath("//div[@id='brandsRefinements']//ul[contains(@id,'filter')]//span[@class='a-list-item']/a//span[@class='a-size-base a-color-base']"));
 
-        private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
-
-        private IWebElement NextButton => driver.FindElement(By.XPath(_nextButton));
+       // private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
+        private IWebElement NextButton => driver.FindElement(By.XPath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']"));
         private By laptopLocators => By.XPath("//span[@class='rush-component s-latency-cf-section']");
 
         private readonly string _resultRow = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']";
@@ -164,23 +164,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             }
         }
 
-        // Method to go to the next page
-        //public void GoToNextPage()
-        //{
-        //    if (CheckNextButtonDisable() != true)
-        //    {
-        //        driver.FindElement(nextButton).Click();
-        //    }
-            
-        //}
-
-        ////Method to check nextbutton disabled
-        //public bool CheckNextButtonDisable()
-        //{
-        //    string val= driver.FindElement(nextButton).GetAttribute("aria-disabled");
-        //    return val != "true";
-        //}
-
         //Extract numeric value
         public int ExtractNumericValue(string priceText)
         {
@@ -240,22 +223,47 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             js.ExecuteScript("arguments[0].scrollIntoView();", PaginationStrip);
         }
 
-        public void loadNextPage()
+        //public void loadNextPage()
+        //{
+        //    scrollToViewPaginationStrip();
+        //    int currentPage = int.Parse(CurrentPage.Text.ToString());
+        //    if (PaginationButtons.Count > 0)
+        //    {
+        //        foreach (IWebElement currentPageNo in PaginationButtons)
+        //        {
+        //            int g = 0;
+        //        }
+        //    }
+        //}
+
+        // Check if the button is disabled
+        public void IsNextButtonDisabled()
         {
-            scrollToViewPaginationStrip();
-            int currentPage = int.Parse(CurrentPage.Text.ToString());
-            if (PaginationButtons.Count > 0)
+            int pageCount=PaginationButtons.Count();
+            int currentPageNo = 1;
+            int totalCount=pageCount+currentPageNo;//7
+            do
             {
-                foreach (IWebElement currentPageNo in PaginationButtons)
+                if (totalCount != 1)
                 {
-                    int g = 0;
+                    NextButton.Click();
+                    currentPageNo++;
                 }
             }
-        }
+            while (currentPageNo <= 5 && NextButton.Displayed!=false);
 
-        public Boolean IsNextButtonDisabled()
-        {
-            return NextButton.GetAttribute("class").Contains("pagination-disabled");
+            //bool isDisabled = nextButton.GetAttribute("class").Contains("pagination-disabled");
+            //return isDisabled;
+            //var pageNumbers = new List<int>();
+            //foreach (var item in NextButton)
+            //{
+            //    var text = item.Text.Trim();
+            //    Console.WriteLine(text);
+            //    break;
+            //}
+            //PaginationButtons.Count();
+            Console.WriteLine(CurrentPage);
+            
         }
 
 
