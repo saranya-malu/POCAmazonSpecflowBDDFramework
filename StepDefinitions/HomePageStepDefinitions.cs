@@ -59,7 +59,6 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         public void ThenIClickOnOption(string searchItem)
         {
             resultPage=homepage.ClickAutoSuggestList(searchItem);
-            //homepage.ClickAutoSuggestList(searchItem);
         }
 
         [When(@"I select brand name '([^']*)'")]
@@ -129,23 +128,8 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         [Then(@"I navigate till last page of search results")]
         public void ThenINavigateTillLastPageOfSearchResults()
         {
-          resultPage.IsNextButtonDisabled();
+          resultPage.NextButtonNavigation();
         }
-
-        /* [Then(@"I identify (.*) laptops based on reviews and offers")]
-         public void ThenIIdentifyLaptopsBasedOnReviewsAndOffers(int number)
-         {
-             Thread.Sleep(5000);
-             var topLaptops = allLaptops.OrderByDescending(I => I.Reviews) //sorting by reviews in descending order
-                 .ThenByDescending(I => I.Offers) //sorting by offers in descending order if reviews are the same
-                 .Take(number) //Taking the top number of laptops
-                 .ToList();
-
-             foreach (var laptop in topLaptops)
-             {
-                 Console.WriteLine("Laptop: { laptop.Title}, Reviews: { laptop.Reviews}, Offers: { laptop.Offers}");
-             }
-         }*/
 
         [Then(@"I should store Top Three laptop Details into Excel")]
         public void ThenIShouldStoreTopThreeLaptopDetailsIntoExcel()

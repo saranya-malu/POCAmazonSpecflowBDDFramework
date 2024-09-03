@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using POCAmazonSpecflowBDDFramework.Helpers;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace POCAmazonSpecflowBDDFramework.Pages
 {
@@ -45,8 +47,9 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         IReadOnlyCollection<IWebElement> filterBrandNameList => driver.FindElements(By.XPath("//div[@id='brandsRefinements']//ul[contains(@id,'filter')]//span[@class='a-list-item']/a//span[@class='a-size-base a-color-base']"));
 
-       // private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
-        private IWebElement NextButton => driver.FindElement(By.XPath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']"));
+       private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
+        private IWebElement NextButton => driver.FindElement(By.XPath(_nextButton));
+        //private IWebElement NextButton => driver.FindElement(By.XPath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']"));
         private By laptopLocators => By.XPath("//span[@class='rush-component s-latency-cf-section']");
 
         private readonly string _resultRow = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']";
@@ -70,6 +73,8 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         private IWebElement CurrentPage => driver.FindElement(By.XPath(_currentPage));
         IReadOnlyCollection<IWebElement> PaginationButtons => driver.FindElements(By.XPath(_paginationButtons));
+
+        IReadOnlyCollection<IWebElement> Pagination => driver.FindElements(By.CssSelector("span.s-pagination-strip"));
         public ResultsPage(IWebDriver driver)
         {
             this.driver = driver;
@@ -216,56 +221,43 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
             goButton.Click();
         }
-
-        public void scrollToViewPaginationStrip()
-        {
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            js.ExecuteScript("arguments[0].scrollIntoView();", PaginationStrip);
-        }
-
-        //public void loadNextPage()
-        //{
-        //    scrollToViewPaginationStrip();
-        //    int currentPage = int.Parse(CurrentPage.Text.ToString());
-        //    if (PaginationButtons.Count > 0)
-        //    {
-        //        foreach (IWebElement currentPageNo in PaginationButtons)
-        //        {
-        //            int g = 0;
-        //        }
-        //    }
-        //}
-
-        // Check if the button is disabled
-        public void IsNextButtonDisabled()
+        
+        //Click next button and navigate to 5 or less pages
+        public void NextButtonNavigation()
         {
             int pageCount=PaginationButtons.Count();
             int currentPageNo = 1;
-            int totalCount=pageCount+currentPageNo;//7
+            int totalCount=pageCount+currentPageNo;
             do
             {
-                if (totalCount != 1)
+                if (IsNextButtonDisabled())
                 {
-                    NextButton.Click();
-                    currentPageNo++;
+                    break;
                 }
+                NextButton.Click();
+                currentPageNo++;
             }
-            while (currentPageNo <= 5 && NextButton.Displayed!=false);
-
-            //bool isDisabled = nextButton.GetAttribute("class").Contains("pagination-disabled");
-            //return isDisabled;
-            //var pageNumbers = new List<int>();
-            //foreach (var item in NextButton)
-            //{
-            //    var text = item.Text.Trim();
-            //    Console.WriteLine(text);
-            //    break;
-            //}
-            //PaginationButtons.Count();
-            Console.WriteLine(CurrentPage);
-            
+            while (currentPageNo <= 5);
+    
         }
 
+        // Check if next button is disabled
+        public bool IsNextButtonDisabled()
+        {
+            return NextButton.GetAttribute("class").Contains("pagination-disabled");
+        }
+
+        public bool IsPageStripPresent()
+        {
+            try
+            {
+                return Pagination.Count > 0;
+            } 
+            catch 
+            { 
+                return false; 
+            }
+        }
 
         public JsonArray GetLaptopDetails()
         {
@@ -355,14 +347,14 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             Console.WriteLine($"Base Directory: {baseDirectory}");
 
 
-            string projectRootDirectory = Path.GetFullPath(Path.Combine(baseDirectory, @"..\..\..\..\..\..\"));
+            string projectRootDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDirectory, @"..\..\..\..\..\..\"));
 
 
             Console.WriteLine($"Project Root Directory: {projectRootDirectory}");
 
 
-            string folderPath = Path.Combine(projectRootDirectory, "LapTopData");
-            string filePath = Path.Combine(folderPath, "LapTopDetails.xlsx");
+            string folderPath = System.IO.Path.Combine(projectRootDirectory, "LapTopData");
+            string filePath = System.IO.Path.Combine(folderPath, "LapTopDetails.xlsx");
 
 
             if (!Directory.Exists(folderPath))

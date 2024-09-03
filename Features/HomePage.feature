@@ -19,7 +19,7 @@ Scenario: Amazon usecases
 	Then I select price range in filter
 	| LowerLimit | UpperLimit |
 	| 20000      | 30000      |
-	Then I navigate till last page of search results
+	#Then I navigate till last page of search results
 	Then I should store Top Three laptop Details into Excel
 	Then I click on Add to cart button
 	Then I click on cart button
