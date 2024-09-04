@@ -228,17 +228,19 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             int pageCount=PaginationButtons.Count();
             int currentPageNo = 1;
             int totalCount=pageCount+currentPageNo;
-            do
+            if (IsPageStripPresent() != false)
             {
-                if (IsNextButtonDisabled())
+                do
                 {
-                    break;
+                    if (IsNextButtonDisabled())
+                    {
+                        break;
+                    }
+                    NextButton.Click();
+                    currentPageNo++;
                 }
-                NextButton.Click();
-                currentPageNo++;
+                while (currentPageNo <= 5);
             }
-            while (currentPageNo <= 5);
-    
         }
 
         // Check if next button is disabled
@@ -247,6 +249,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             return NextButton.GetAttribute("class").Contains("pagination-disabled");
         }
 
+        //Check pagestrip ispresent
         public bool IsPageStripPresent()
         {
             try
@@ -261,7 +264,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         public JsonArray GetLaptopDetails()
         {
-            List<IWebElement> products = GetProductsTitle();
+            List<IWebElement> products = GetProductsTitle();//fetches title of all prodcuts
             var laptopDetailsList = new List<LaptopDetails>();
 
             for (int i = 0; i < 4; i++)
@@ -323,21 +326,25 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             return jsonArray;
         }
 
+        //get all product titles
         public List<IWebElement> GetProductsTitle()
         {
-            return driver.FindElements(By.XPath(_productTitle)).ToList();
+            return driver.FindElements(By.XPath(_productTitle)).ToList();//return product title
         }
 
+        //get rating of laptops
         public List<IWebElement> GetProductsRating(String laptopName)
         {
-            return driver.FindElements(By.XPath(String.Format(_ratingElement, laptopName))).ToList();
+            return driver.FindElements(By.XPath(String.Format(_ratingElement, laptopName))).ToList();//getting laptop ratings using laptop name
         }
-
+    
+        //get offers of laptop
         public List<IWebElement> GetProductsOffer(String laptopName)
         {
-            return driver.FindElements(By.XPath(String.Format(_ItemOffer, laptopName))).ToList();
+            return driver.FindElements(By.XPath(String.Format(_ItemOffer, laptopName))).ToList();//getting laptop offers using laptop names
         }
-
+        
+        //Writing top 3 laptop details to excel
         public void WriteJsonArrayToExcel(JsonArray jsonArray)
         {
 
@@ -387,7 +394,8 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
             Console.WriteLine($"Excel file created at: {filePath}");
         }
-
+    
+        //sorts laptops based on rating and offer
         public JsonArray GetTop3Laptops(JsonArray jsonArray)
         {
 
