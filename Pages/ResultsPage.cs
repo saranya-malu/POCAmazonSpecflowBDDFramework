@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using POCAmazonSpecflowBDDFramework.Helpers;
@@ -22,9 +23,9 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         private Actions actions;
 
         private IWebElement lenovo => driver.FindElement(By.XPath("//span[text()='Lenovo']"));
-        
+
         private IWebElement goButton => driver.FindElement(By.XPath("//input[@class='a-button-input' and @type='submit']"));
-        private IWebElement addtoCart => driver.FindElement(By.XPath("//button[@id='a-autoid-1-announce']"));
+        private IWebElement addtoCart => driver.FindElement(By.XPath("(//button[@class='a-button-text'])[1]"));
 
         private IWebElement moveToCart => driver.FindElement(By.XPath("//span[@id='nav-cart-count']"));
         private IWebElement proceedtoPay => driver.FindElement(By.XPath("//input[@value='Proceed to checkout']"));
@@ -47,10 +48,8 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         IReadOnlyCollection<IWebElement> filterBrandNameList => driver.FindElements(By.XPath("//div[@id='brandsRefinements']//ul[contains(@id,'filter')]//span[@class='a-list-item']/a//span[@class='a-size-base a-color-base']"));
 
-       private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
+        private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
         private IWebElement NextButton => driver.FindElement(By.XPath(_nextButton));
-        //private IWebElement NextButton => driver.FindElement(By.XPath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']"));
-        private By laptopLocators => By.XPath("//span[@class='rush-component s-latency-cf-section']");
 
         private readonly string _resultRow = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']";
 
@@ -62,10 +61,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
 
         private readonly string _ItemOffer = "//div[@class='a-section']//div[@class='a-section a-spacing-small a-spacing-top-small']//div[@data-cy='title-recipe']//span[contains(text(),'{0}')]/parent::a/parent::h2/parent::div/following-sibling::div[@class='puisg-row']//div[@data-cy='price-recipe']//span[contains(text(),'%')]";
-
-        private readonly string _paginationStrip = "//span[@class='s-pagination-strip']";
-
-        private IWebElement PaginationStrip => driver.FindElement(By.XPath(_paginationStrip));
 
         private readonly string _paginationButtons = "//span[@class='s-pagination-strip']//a[@class='s-pagination-item s-pagination-button']";
 
@@ -158,9 +153,9 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         public void SelectBrandNameAsFilter(String BrandName)
         {
-            foreach(IWebElement element in filterBrandNameList)
+            foreach (IWebElement element in filterBrandNameList)
             {
-                String Brand=element.Text;
+                String Brand = element.Text;
                 if (Brand.Equals(BrandName))
                 {
                     element.Click();
@@ -177,18 +172,18 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         }
 
         // Extract the minimum and maximum prices directly from the slider attributes
-        public int CalculateSliderValue(int price,int maxSliderValue)
+        public int CalculateSliderValue(int price, int maxSliderValue)
         {
             int minPrice = ExtractNumericValue(priceRangeUpperBound.GetAttribute("aria-valuetext"));//calling Extract method to get value from upper range after conversion
             int maxPrice = ExtractNumericValue(priceRangeLowerBound.GetAttribute("aria-valuetext"));//calling Extract method to get value from lower range after conversion
 
             // Clamp the input price within the slider’s range
-            if (price < minPrice) price= minPrice;
-            if(price > maxPrice) price= maxPrice;
+            if (price < minPrice) price = minPrice;
+            if (price > maxPrice) price = maxPrice;
 
             // Calculate the slider value proportionally
-            double proportion=(double)(price-minPrice)/(maxPrice-minPrice);
-            return (int)(Math.Round(proportion*maxSliderValue));
+            double proportion = (double)(price - minPrice) / (maxPrice - minPrice);
+            return (int)(Math.Round(proportion * maxSliderValue));
         }
 
         //Move slider
@@ -199,7 +194,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         }
 
         //Setprice range to sliders
-        public void SetPriceRangeFilter(int lowerPrice,int upperPrice)
+        public void SetPriceRangeFilter(int lowerPrice, int upperPrice)
         {
             // Calculate slider values based on the desired price range
             int maxSliderValue = int.Parse(priceRangeUpperBound.GetAttribute("max"));
@@ -221,25 +216,38 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
             goButton.Click();
         }
-        
+
         //Click next button and navigate to 5 or less pages
         public void NextButtonNavigation()
         {
-            int pageCount=PaginationButtons.Count();
+            int pageCount = PaginationButtons.Count();
             int currentPageNo = 1;
-            int totalCount=pageCount+currentPageNo;
+            int totalPageLimit = 5;
+            int totalCount = pageCount + currentPageNo;
+
             if (IsPageStripPresent() != false)
             {
                 do
                 {
-                    if (IsNextButtonDisabled())
+                    // Get laptop details from the current page
+                    JsonArray laptopDetails = GetLaptopDetails();
+
+                    // Get top 3 laptops from the current page
+                    JsonArray top3Laptops = GetTop3Laptops(laptopDetails);
+
+                    // Write the top 3 laptops to Excel, specifying the sheet name as the current page number
+                    WriteJsonArrayToExcel(top3Laptops, $"Page{currentPageNo}");
+
+                    if (IsNextButtonDisabled())// Check if the next button is disabled (i.e., no more pages to navigate)
                     {
                         break;
                     }
-                    NextButton.Click();
+
+
+                    NextButton.Click();// Click the next button and navigate to the next page
                     currentPageNo++;
                 }
-                while (currentPageNo <= 5);
+                while (currentPageNo <= totalPageLimit);// Limit to 5 pages or less                                     // Write all collected data to Excel after the loop
             }
         }
 
@@ -255,13 +263,14 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             try
             {
                 return Pagination.Count > 0;
-            } 
-            catch 
-            { 
-                return false; 
+            }
+            catch
+            {
+                return false;
             }
         }
 
+        //Get sorted laptop details
         public JsonArray GetLaptopDetails()
         {
             List<IWebElement> products = GetProductsTitle();//fetches title of all prodcuts
@@ -337,15 +346,15 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         {
             return driver.FindElements(By.XPath(String.Format(_ratingElement, laptopName))).ToList();//getting laptop ratings using laptop name
         }
-    
+
         //get offers of laptop
         public List<IWebElement> GetProductsOffer(String laptopName)
         {
             return driver.FindElements(By.XPath(String.Format(_ItemOffer, laptopName))).ToList();//getting laptop offers using laptop names
         }
-        
+
         //Writing top 3 laptop details to excel
-        public void WriteJsonArrayToExcel(JsonArray jsonArray)
+        public void WriteJsonArrayToExcel(JsonArray jsonArray, string sheetName)
         {
             // Get the base directory and project root directory
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -367,7 +376,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             // Create an Excel workbook
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("page1");
+                var worksheet = workbook.Worksheets.Add(sheetName);
                 worksheet.Cell(1, 1).Value = "LaptopName";
                 worksheet.Cell(1, 2).Value = "Rating";
                 worksheet.Cell(1, 3).Value = "Offer";
@@ -386,7 +395,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             }
             Console.WriteLine($"Excel file created at: {filePath}");
         }
-    
+
         //sorts laptops based on rating and offer
         public JsonArray GetTop3Laptops(JsonArray jsonArray)
         {
@@ -423,5 +432,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             return sortedJsonArray;
         }
     }
-
 }
+
+

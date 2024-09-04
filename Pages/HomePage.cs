@@ -13,7 +13,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
     {
         private readonly IWebDriver driver;//webdriver instance
         private readonly String pageurl = "https://www.amazon.in/";//homepage url
-        //public readonly WebDriverWait wait;
 
 
         public HomePage(IWebDriver driver)//parametrized constructor
@@ -22,8 +21,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         }
 
         private IWebElement searchBox => driver.FindElement(By.XPath("//input[@id='twotabsearchtextbox']"));
-
-        //private IReadOnlyCollection<IWebElement> AutoSuggestList => driver.FindElements(By.XPath("//div[@class='s-suggestion s-suggestion-ellipsis-direction']"));
         private IReadOnlyCollection<IWebElement> AutoSuggestList => driver.FindElements(By.XPath("//div[contains(@class,'results-container')]//div[contains(@class,'suggestion-container')]//div[@role='button']"));
         
         //navigate to homepage
@@ -63,17 +60,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
                   }
               }
             return null;
-           /* var suggestion = AutoSuggestList.FirstOrDefault(s => s.Text.Contains(searchTerm));
-            if (suggestion != null)
-            {
-                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-                suggestion.Click();
-                driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            }
-            else
-            {
-                throw new NoSuchElementException($"No autosuggestion found for {searchTerm}");
-            }*/
         }
     }
 }
