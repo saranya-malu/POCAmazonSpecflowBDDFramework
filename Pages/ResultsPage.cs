@@ -270,20 +270,20 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             for (int i = 0; i < 4; i++)
             {
                 string laptopName = products[i].Text;
-                int keywordIndex = laptopName.IndexOf("Laptop");
+                int keywordIndex = laptopName.IndexOf("Laptop");//
                 if (keywordIndex != -1)
                 {
-                    laptopName = laptopName.Substring(0, keywordIndex + "Laptop".Length).Trim();
+                    laptopName = laptopName.Substring(0, keywordIndex + "Laptop".Length).Trim();//If the word "Laptop" is present in the name, it trims the name to include only the part up to "Laptop."
                 }
 
                 double rating = 0.0;
                 int offer = 0;
-                List<IWebElement> productRatingElements = GetProductsRating(laptopName);
-                List<IWebElement> productOfferElements = GetProductsOffer(laptopName);
+                List<IWebElement> productRatingElements = GetProductsRating(laptopName);//fetch product rating
+                List<IWebElement> productOfferElements = GetProductsOffer(laptopName);//fetch product offers
 
                 if (productRatingElements.Count > 0 && productOfferElements.Count > 0)
                 {
-                    string ratingText = productRatingElements[0].GetAttribute("aria-label");
+                    string ratingText = productRatingElements[0].GetAttribute("aria-label");//Extracts and parses the rating from the aria-label attribute of the product rating element
                     var Ratingmatch = Regex.Match(ratingText, @"(\d+(\.\d+)?)");
                     if (Ratingmatch.Success)
                     {
@@ -294,7 +294,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
                         }
                     }
 
-                    string offerText = productOfferElements[0].Text;
+                    string offerText = productOfferElements[0].Text;//Extracts the percentage of the offer using a regex match
                     var Offermatch = Regex.Match(offerText, @"(\d+)% off");
                     if (Offermatch.Success)
                     {
@@ -347,36 +347,30 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         //Writing top 3 laptop details to excel
         public void WriteJsonArrayToExcel(JsonArray jsonArray)
         {
-
+            // Get the base directory and project root directory
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
-
             Console.WriteLine($"Base Directory: {baseDirectory}");
 
-
             string projectRootDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDirectory, @"..\..\..\..\..\..\"));
-
-
             Console.WriteLine($"Project Root Directory: {projectRootDirectory}");
 
-
+            // Set up folder and file paths
             string folderPath = System.IO.Path.Combine(projectRootDirectory, "LapTopData");
             string filePath = System.IO.Path.Combine(folderPath, "LapTopDetails.xlsx");
 
-
+            // Create the directory if it doesn't exist
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
+
+            // Create an Excel workbook
             using (var workbook = new XLWorkbook())
             {
                 var worksheet = workbook.Worksheets.Add("page1");
-
-
                 worksheet.Cell(1, 1).Value = "LaptopName";
                 worksheet.Cell(1, 2).Value = "Rating";
                 worksheet.Cell(1, 3).Value = "Offer";
-
 
                 int row = 2; // Start from the second row
                 foreach (var item in jsonArray)
@@ -388,17 +382,14 @@ namespace POCAmazonSpecflowBDDFramework.Pages
                     row++;
                 }
 
-
                 workbook.SaveAs(filePath);
             }
-
             Console.WriteLine($"Excel file created at: {filePath}");
         }
     
         //sorts laptops based on rating and offer
         public JsonArray GetTop3Laptops(JsonArray jsonArray)
         {
-
             var laptopDetailsList = jsonArray.Select(item =>
             {
                 var jsonObject = item.AsObject();
@@ -429,7 +420,6 @@ namespace POCAmazonSpecflowBDDFramework.Pages
                 };
                 sortedJsonArray.Add(jsonObject);
             }
-
             return sortedJsonArray;
         }
     }
