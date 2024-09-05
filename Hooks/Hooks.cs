@@ -47,13 +47,13 @@ namespace POCAmazonSpecflowBDDFramework.Hooks
             driver.Manage().Cookies.DeleteAllCookies();
         }
 
-/*             [AfterScenario]
+             [AfterScenario]
                public static void CloseBrowser()
                {
                    driver.Quit();
                     driver=null;
                }
-*/
+
         //property to get webdriver instance in step definitions
         public static IWebDriver Driver
         {

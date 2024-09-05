@@ -129,10 +129,6 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
         public void ThenINavigateTillLastPageOfSearchResults()
         {
           resultPage.NextButtonNavigation();
-            JsonArray LaptopDetails = resultPage.GetLaptopDetails();
-            JsonArray Top3Laptops = resultPage.GetTop3Laptops(LaptopDetails);
-            Console.WriteLine(LaptopDetails.ToString());
-            resultPage.WriteJsonArrayToExcel(Top3Laptops);
         }
     }
 }

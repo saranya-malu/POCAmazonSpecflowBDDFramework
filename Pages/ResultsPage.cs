@@ -225,30 +225,28 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             int totalPageLimit = 5;
             int totalCount = pageCount + currentPageNo;
 
-            if (IsPageStripPresent() != false)
+            do
             {
-                do
+                // Get laptop details from the current page
+                JsonArray laptopDetails = GetLaptopDetails();
+
+                // Get top 3 laptops from the current page
+                JsonArray top3Laptops = GetTop3Laptops(laptopDetails);
+
+                // Write the top 3 laptops to Excel, specifying the sheet name as the current page number
+                WriteJsonArrayToExcel(top3Laptops, currentPageNo);
+
+                if (!IsPageStripPresent() || IsNextButtonDisabled())// Check if the next button is disabled (i.e., no more pages to navigate)
                 {
-                    // Get laptop details from the current page
-                    JsonArray laptopDetails = GetLaptopDetails();
-
-                    // Get top 3 laptops from the current page
-                    JsonArray top3Laptops = GetTop3Laptops(laptopDetails);
-
-                    // Write the top 3 laptops to Excel, specifying the sheet name as the current page number
-                    WriteJsonArrayToExcel(top3Laptops);
-
-                    if (IsNextButtonDisabled())// Check if the next button is disabled (i.e., no more pages to navigate)
-                    {
-                        break;
-                    }
-
-
-                    NextButton.Click();// Click the next button and navigate to the next page
-                    currentPageNo++;
+                    break;
                 }
-                while (currentPageNo <= totalPageLimit);// Limit to 5 pages or less                                     // Write all collected data to Excel after the loop
+
+
+                NextButton.Click();// Click the next button and navigate to the next page
+                currentPageNo++;
             }
+            while (currentPageNo <= totalPageLimit);// Limit to 5 pages or less                                     // Write all collected data to Excel after the loop
+
         }
 
         // Check if next button is disabled
@@ -356,7 +354,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         }
 
         //Writing top 3 laptop details to excel
-        public void WriteJsonArrayToExcel(JsonArray jsonArray)
+        public void WriteJsonArrayToExcel(JsonArray jsonArray,int currentPageNo)
         {
             // Get the base directory and project root directory
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -367,7 +365,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
             // Set up folder and file paths
             string folderPath = System.IO.Path.Combine(projectRootDirectory, "LapTopData");
-            string filePath = System.IO.Path.Combine(folderPath, "LapTopDetails.xlsx");
+            string filePath = System.IO.Path.Combine(folderPath, $"LapTopDetails_Page{currentPageNo}.xlsx");
 
             // Create the directory if it doesn't exist
             if (!Directory.Exists(folderPath))
@@ -375,15 +373,30 @@ namespace POCAmazonSpecflowBDDFramework.Pages
                 Directory.CreateDirectory(folderPath);
             }
 
-            // Create an Excel workbook
-            using (var workbook = new XLWorkbook())
+            // Delete the existing file if it exists
+            if (File.Exists(filePath))
             {
-                var worksheet = workbook.Worksheets.Add("page1");
-                worksheet.Cell(1, 1).Value = "LaptopName";
-                worksheet.Cell(1, 2).Value = "Rating";
-                worksheet.Cell(1, 3).Value = "Offer";
+                File.Delete(filePath); // This will ensure the file is overwritten with new data
+            }
 
-                int row = 2; // Start from the second row
+            // Check if file already exists to avoid overwriting
+            bool fileExists = File.Exists(filePath);
+
+            // Create an Excel workbook
+            using (var workbook = fileExists ?  new XLWorkbook(filePath):new XLWorkbook())
+            {
+                // Create a new worksheet for the current page
+                var worksheet = workbook.Worksheets.Count > 0 ? workbook.Worksheet(1) : workbook.AddWorksheet($"Page{currentPageNo}");
+
+                // If the file was just created, add headers
+                if (!fileExists)
+                {
+                    worksheet.Cell(1, 1).Value = "LaptopName";
+                    worksheet.Cell(1, 2).Value = "Rating";
+                    worksheet.Cell(1, 3).Value = "Offer";
+                }
+
+                int row = worksheet.LastRowUsed().RowNumber() + 1; // Start from the next available row // Start from the second row
                 foreach (var item in jsonArray)
                 {
                     var jsonObject = item.AsObject();
@@ -395,7 +408,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
                 workbook.SaveAs(filePath);
             }
-            Console.WriteLine($"Excel file created at: {filePath}");
+            Console.WriteLine($"Excel file created for page {currentPageNo} at: {filePath}");
         }
 
         //sorts laptops based on rating and offer
