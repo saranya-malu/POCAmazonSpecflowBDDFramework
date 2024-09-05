@@ -46,7 +46,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
 
         private IWebElement priceRangeLowerBound => driver.FindElement(By.XPath("//input[contains(@id,'slider-item_lower-bound-slider')]"));
 
-        IReadOnlyCollection<IWebElement> filterBrandNameList => driver.FindElements(By.XPath("//div[@id='brandsRefinements']//ul[contains(@id,'filter')]//span[@class='a-list-item']/a//span[@class='a-size-base a-color-base']"));
+        IReadOnlyCollection<IWebElement> filterBrandNameList => driver.FindElements(By.XPath("//div[@id='brandsRefinements']//ul[@class='a-unordered-list a-nostyle a-vertical a-spacing-medium']//span[@class='a-list-item']/a//span[@class='a-size-base a-color-base']"));
 
         private readonly string _nextButton = "//span[@class='s-pagination-strip']//*[contains(@class,'s-pagination-next')]";
         private IWebElement NextButton => driver.FindElement(By.XPath(_nextButton));
@@ -236,7 +236,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
                     JsonArray top3Laptops = GetTop3Laptops(laptopDetails);
 
                     // Write the top 3 laptops to Excel, specifying the sheet name as the current page number
-                    WriteJsonArrayToExcel(top3Laptops, $"Page{currentPageNo}");
+                    WriteJsonArrayToExcel(top3Laptops);
 
                     if (IsNextButtonDisabled())// Check if the next button is disabled (i.e., no more pages to navigate)
                     {
@@ -276,10 +276,12 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             List<IWebElement> products = GetProductsTitle();//fetches title of all prodcuts
             var laptopDetailsList = new List<LaptopDetails>();
 
-            for (int i = 0; i < 4; i++)
+            int productCount = Math.Min(products.Count, 4); // Adjust based on available products, max 4
+
+            for (int i = 0; i < productCount; i++)
             {
                 string laptopName = products[i].Text;
-                int keywordIndex = laptopName.IndexOf("Laptop");//
+                int keywordIndex = laptopName.IndexOf("Laptop");
                 if (keywordIndex != -1)
                 {
                     laptopName = laptopName.Substring(0, keywordIndex + "Laptop".Length).Trim();//If the word "Laptop" is present in the name, it trims the name to include only the part up to "Laptop."
@@ -354,7 +356,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
         }
 
         //Writing top 3 laptop details to excel
-        public void WriteJsonArrayToExcel(JsonArray jsonArray, string sheetName)
+        public void WriteJsonArrayToExcel(JsonArray jsonArray)
         {
             // Get the base directory and project root directory
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -376,7 +378,7 @@ namespace POCAmazonSpecflowBDDFramework.Pages
             // Create an Excel workbook
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add(sheetName);
+                var worksheet = workbook.Worksheets.Add("page1");
                 worksheet.Cell(1, 1).Value = "LaptopName";
                 worksheet.Cell(1, 2).Value = "Rating";
                 worksheet.Cell(1, 3).Value = "Offer";

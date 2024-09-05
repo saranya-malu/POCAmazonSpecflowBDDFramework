@@ -132,7 +132,7 @@ namespace POCAmazonSpecflowBDDFramework.StepDefinitions
             JsonArray LaptopDetails = resultPage.GetLaptopDetails();
             JsonArray Top3Laptops = resultPage.GetTop3Laptops(LaptopDetails);
             Console.WriteLine(LaptopDetails.ToString());
-            resultPage.WriteJsonArrayToExcel(Top3Laptops,"sheet1");
+            resultPage.WriteJsonArrayToExcel(Top3Laptops);
         }
     }
 }
